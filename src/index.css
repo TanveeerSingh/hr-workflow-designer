@@ -1,0 +1,343 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* Design tokens */
+  --color-primary: #6366F1;
+  --color-accent: #059669;
+  --color-surface: #FFFFFF;
+  --color-bg: #F8FAFC;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(99, 102, 241, 0.1);
+  --shadow-lg: 0 10px 24px rgba(99, 102, 241, 0.12);
+  --shadow-elevation: 0 8px 32px rgba(99, 102, 241, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #F8FAFC 0%, #F5F3FF 100%);
+  color: #0F172A;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 2.25rem;
+}
+
+h2 {
+  font-size: 1.875rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+h4 {
+  font-size: 1.25rem;
+}
+
+p {
+  color: #64748B;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* React Flow Custom Styles */
+.react-flow {
+  background: linear-gradient(135deg, #F8FAFC 0%, #F5F3FF 100%);
+}
+
+.react-flow__node {
+  border-radius: 8px;
+  border: 2px solid;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 150ms ease-out;
+}
+
+.react-flow__node:hover {
+  transform: translateY(-1px);
+}
+
+.react-flow__node.selected {
+  filter: brightness(1.05);
+}
+
+.react-flow__handle {
+  width: 12px;
+  height: 12px;
+  background-color: #6366F1;
+  border: 3px solid #FFFFFF;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+  transition: all 150ms ease-out;
+}
+
+.react-flow__handle:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.react-flow__edge {
+  stroke-width: 2;
+  stroke: #6366F1;
+}
+
+.react-flow__edge.animated {
+  animation: flowEdgeAnimation 2s linear infinite;
+}
+
+@keyframes flowEdgeAnimation {
+  0% {
+    stroke-dasharray: 5, 5;
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -10;
+  }
+}
+
+.react-flow__connection {
+  stroke: #6366F1;
+  stroke-width: 2;
+}
+
+.react-flow__connectionline {
+  stroke: #6366F1;
+  stroke-width: 2;
+}
+
+/* Buttons */
+button {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0.5rem;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0px);
+}
+
+/* Primary Button */
+.btn-primary {
+  background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+.btn-primary:active {
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background: #F5F3FF;
+  color: #6366F1;
+  border: 1.5px solid #E0E7FF;
+}
+
+.btn-secondary:hover {
+  background: #EBEEF8;
+  border-color: #C7D2FE;
+}
+
+/* Destructive Button */
+.btn-destructive {
+  background: #FEE2E2;
+  color: #DC2626;
+  border: 1.5px solid #FECACA;
+}
+
+.btn-destructive:hover {
+  background: #FCA5A5;
+  border-color: #F87171;
+}
+
+/* Cards and Containers */
+.card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #E0E7FF;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+  transition: all 200ms ease-out;
+}
+
+.card:hover {
+  border-color: #C7D2FE;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.12);
+}
+
+.card-hover {
+  cursor: pointer;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+}
+
+/* Input fields */
+input, textarea, select {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  border-radius: 0.75rem;
+  border: 1.5px solid #E0E7FF;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  transition: all 150ms ease-out;
+  background: white;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #6366F1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+input:disabled, textarea:disabled, select:disabled {
+  background: #F5F3FF;
+  color: #94A3B8;
+  cursor: not-allowed;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C7D2FE;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #A5B4FC;
+}
+
+/* Animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 200ms ease-in-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.react-flow__edge-path {
+  stroke: #2563EB;
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #7C3AED;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5FD;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Form Elements */
+input, textarea, select {
+  font-family: 'Fira Sans', system-ui, sans-serif;
+}
+
+/* Animation Classes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 150ms ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 200ms ease-out;
+}
