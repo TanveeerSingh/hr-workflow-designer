@@ -99,15 +99,22 @@ src/
 
 ## Getting Started
 
-### Prerequisites
+### Live Application
+**The app is live and available at:** https://tanveeersingh.github.io/hr-workflow-designer/
+
+No local setup needed - just visit the link above to start designing workflows!
+
+### Local Development
+
+#### Prerequisites
 - Node.js 18+
 - npm or yarn
 
-### Installation
+#### Installation
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/TanveeerSingh/hr-workflow-designer.git
 cd hr-workflow-designer
 
 # Install dependencies
@@ -117,7 +124,7 @@ npm install
 npm run dev
 ```
 
-The application will be available at `http://localhost:5173`
+The local development server will be available at `http://localhost:5173`
 
 ### Build for Production
 
