@@ -1,5 +1,9 @@
 # HR Workflow Designer
 
+[![Deploy to GitHub Pages](https://github.com/TanveeerSingh/hr-workflow-designer/actions/workflows/deploy.yml/badge.svg)](https://github.com/TanveeerSingh/hr-workflow-designer/actions/workflows/deploy.yml)
+
+Live site: https://tanveeersingh.github.io/hr-workflow-designer/
+
 A modern, drag-and-drop workflow designer built with React, TypeScript, and React Flow. This application allows HR administrators to visually create and test internal workflows such as onboarding, leave approval, or document verification.
 
 ## Features
