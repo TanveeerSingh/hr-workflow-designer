@@ -167,7 +167,7 @@ This project uses a flat design aesthetic with:
 With more time, the following features could be added:
 - Export/Import workflow as JSON
 - Undo/Redo functionality
-- Mini-map and zoom controls
+- Mini-map overview panel
 - Workflow validation errors visually shown on nodes
 - Auto-layout for nodes
 - Node version history
