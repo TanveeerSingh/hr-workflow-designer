@@ -72,7 +72,8 @@ const nodeItems: Omit<NodeItemProps, 'onDragStart'>[] = [
 
 export default function NodeSidebar() {
   return (
-    <div className="w-56 bg-gradient-to-b from-surface to-surface-dim border-r border-border h-full flex flex-col overflow-hidden">
+    <div className="w-56 bg-gradient-to-b from-surface to-surface-dim h-full flex flex-col overflow-hidden rounded-2xl border border-border/70 shadow-sm">
+
       {/* Header */}
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2 mb-1">

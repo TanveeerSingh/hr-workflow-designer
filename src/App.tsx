@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   Background,
-  Controls,
   useNodesState,
   useEdgesState,
   addEdge,
@@ -25,9 +24,11 @@ import { mockApi } from './api/mockApi';
 function Flow() {
   const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowNode>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
-  const [selectedNode, setSelectedNode] = useState<Node<WorkflowNodeData> | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [pendingConnectionSourceId, setPendingConnectionSourceId] = useState<string | null>(null);
   const [automationActions, setAutomationActions] = useState<AutomationAction[]>([]);
   const [isSimulationOpen, setIsSimulationOpen] = useState(false);
+  const [simulationRunTrigger, setSimulationRunTrigger] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const { screenToFlowPosition, fitView } = useReactFlow();
 
@@ -45,6 +46,18 @@ function Flow() {
     };
     loadActions();
   }, []);
+
+  useEffect(() => {
+    if (nodes.length === 0) return;
+
+    const frameId = window.requestAnimationFrame(() => {
+      void fitView({ padding: 0.2, duration: 250 });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [isSimulationOpen, nodes.length, fitView]);
 
   // Drag and drop handlers
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -98,17 +111,61 @@ function Flow() {
   const onConnect = useCallback(
     (connection: Connection) => {
       setEdges((eds) => addEdge(connection, eds));
+      setPendingConnectionSourceId(null);
     },
     [setEdges]
   );
 
-  // Node selection
+  // Node selection + click-to-connect
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
-    setSelectedNode(node as Node<WorkflowNodeData>);
-  }, []);
+    const clickedNode = node as Node<WorkflowNodeData>;
+    setSelectedNodeId(clickedNode.id);
+
+    setPendingConnectionSourceId((currentSourceNodeId) => {
+      if (!currentSourceNodeId) {
+        // End nodes cannot start a connection.
+        if (clickedNode.data.type === 'end') {
+          return null;
+        }
+        return clickedNode.id;
+      }
+
+      // Clicking same node toggles connection mode off.
+      if (currentSourceNodeId === clickedNode.id) {
+        return null;
+      }
+
+      // Start nodes should not receive incoming edges.
+      if (clickedNode.data.type === 'start') {
+        return currentSourceNodeId;
+      }
+
+      setEdges((currentEdges) => {
+        const alreadyConnected = currentEdges.some(
+          (edge) => edge.source === currentSourceNodeId && edge.target === clickedNode.id
+        );
+
+        if (alreadyConnected) {
+          return currentEdges;
+        }
+
+        return addEdge(
+          {
+            id: uuidv4(),
+            source: currentSourceNodeId,
+            target: clickedNode.id,
+          },
+          currentEdges
+        );
+      });
+
+      return null;
+    });
+  }, [setEdges]);
 
   const onPaneClick = useCallback(() => {
-    setSelectedNode(null);
+    setSelectedNodeId(null);
+    setPendingConnectionSourceId(null);
   }, []);
 
   // Update node data
@@ -133,7 +190,8 @@ function Flow() {
       setEdges((eds) =>
         eds.filter((e) => e.source !== nodeId && e.target !== nodeId)
       );
-      setSelectedNode(null);
+      setSelectedNodeId((currentId) => (currentId === nodeId ? null : currentId));
+      setPendingConnectionSourceId((currentId) => (currentId === nodeId ? null : currentId));
     },
     [setNodes, setEdges]
   );
@@ -142,7 +200,8 @@ function Flow() {
   const clearAll = useCallback(() => {
     setNodes([]);
     setEdges([]);
-    setSelectedNode(null);
+    setSelectedNodeId(null);
+    setPendingConnectionSourceId(null);
   }, [setNodes, setEdges]);
 
   // Load a realistic HR onboarding workflow example
@@ -157,7 +216,7 @@ function Flow() {
       {
         id: startId,
         type: 'start',
-        position: { x: 80, y: 220 },
+        position: { x: 140, y: 40 },
         data: {
           type: 'start',
           label: 'Employee Onboarding Trigger',
@@ -167,7 +226,7 @@ function Flow() {
       {
         id: collectDocsId,
         type: 'task',
-        position: { x: 360, y: 220 },
+        position: { x: 170, y: 150 },
         data: {
           type: 'task',
           label: 'Collect Hiring Documents',
@@ -179,7 +238,7 @@ function Flow() {
       {
         id: managerApprovalId,
         type: 'approval',
-        position: { x: 640, y: 220 },
+        position: { x: 170, y: 340 },
         data: {
           type: 'approval',
           label: 'Manager Budget Approval',
@@ -190,7 +249,7 @@ function Flow() {
       {
         id: createAccountsId,
         type: 'automated',
-        position: { x: 920, y: 220 },
+        position: { x: 120, y: 530 },
         data: {
           type: 'automated',
           label: 'Create IT Accounts + Welcome Email',
@@ -205,7 +264,7 @@ function Flow() {
       {
         id: endId,
         type: 'end',
-        position: { x: 1200, y: 220 },
+        position: { x: 190, y: 720 },
         data: {
           type: 'end',
           label: 'Onboarding Complete',
@@ -224,10 +283,11 @@ function Flow() {
 
     setNodes(exampleNodes);
     setEdges(exampleEdges);
-    setSelectedNode(null);
+    setSelectedNodeId(null);
+    setPendingConnectionSourceId(null);
 
-    requestAnimationFrame(() => {
-      fitView({ padding: 0.2, duration: 500 });
+    window.requestAnimationFrame(() => {
+      void fitView({ padding: 0.2, duration: 300 });
     });
   }, [fitView, setEdges, setNodes]);
 
@@ -258,12 +318,18 @@ function Flow() {
   }
 
   const validation = validateWorkflow();
+  const selectedNode = selectedNodeId
+    ? (nodes.find((node) => node.id === selectedNodeId) as Node<WorkflowNodeData> | undefined) ?? null
+    : null;
+  const pendingConnectionSource = pendingConnectionSourceId
+    ? nodes.find((node) => node.id === pendingConnectionSourceId) ?? null
+    : null;
 
   return (
-    <div className="flex flex-1 h-screen">
+    <div className="flex flex-1 h-[100dvh] gap-2 p-2 overflow-hidden">
       <NodeSidebar />
 
-      <div className="flex-1 relative">
+      <div className="flex-1 relative rounded-2xl border border-border/70 overflow-hidden shadow-sm">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -276,10 +342,9 @@ function Flow() {
           onDrop={onDrop}
           nodeTypes={nodeTypes}
           fitView
-          attributionPosition="bottom-left"
+          proOptions={{ hideAttribution: true }}
         >
           <Background gap={12} size={1} />
-          <Controls />
 
           <Panel position="top-center" className="bg-gradient-to-r from-surface to-surface-dim rounded-2xl shadow-elevation border border-border p-5 backdrop-blur-xl animate-fade-in">
             <div className="flex flex-col gap-3">
@@ -293,7 +358,10 @@ function Flow() {
                 </button>
 
                 <button
-                  onClick={() => setIsSimulationOpen(true)}
+                  onClick={() => {
+                    setIsSimulationOpen(true);
+                    setSimulationRunTrigger((count) => count + 1);
+                  }}
                   className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-primary-dark text-white rounded-lg hover:shadow-lg active:scale-95 transition-all font-medium text-sm whitespace-nowrap"
                 >
                   <Play className="w-5 h-5" />
@@ -319,34 +387,40 @@ function Flow() {
                 <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${validation.valid ? 'bg-success' : 'bg-warning'}`} />
                 <span className="truncate">{validation.valid ? '✓ Valid workflow' : `⚠ ${validation.message}`}</span>
               </div>
+
+              {pendingConnectionSource && (
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium w-full bg-primary/10 text-primary border border-primary/20">
+                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-primary" />
+                  <span className="truncate">
+                    Connecting from "{pendingConnectionSource.data.label}" - click target node
+                  </span>
+                </div>
+              )}
             </div>
           </Panel>
         </ReactFlow>
 
-        {isSimulationOpen && (
-          <>
-            <div
-              className="fixed inset-0 bg-black/20 z-40"
-              onClick={() => setIsSimulationOpen(false)}
-            />
-            <SimulationPanel
-              workflow={{ nodes, edges }}
-              isOpen={isSimulationOpen}
-              onClose={() => setIsSimulationOpen(false)}
-            />
-          </>
-        )}
       </div>
 
-      <NodeEditPanel
-        selectedNode={selectedNode}
-        automationActions={automationActions}
-        onUpdateNode={updateNodeData}
-        onClose={() => setSelectedNode(null)}
-        onDeleteNode={deleteNode}
-        nodes={nodes}
-        edges={edges}
-      />
+      {isSimulationOpen ? (
+        <SimulationPanel
+          workflow={{ nodes, edges }}
+          isOpen={isSimulationOpen}
+          runTrigger={simulationRunTrigger}
+          onClose={() => setIsSimulationOpen(false)}
+        />
+      ) : selectedNode ? (
+        <NodeEditPanel
+          selectedNode={selectedNode}
+          automationActions={automationActions}
+          onUpdateNode={updateNodeData}
+          onClose={() => setSelectedNodeId(null)}
+          onDeleteNode={deleteNode}
+          nodes={nodes}
+          edges={edges}
+        />
+      ) : null
+      }
     </div>
   );
 }

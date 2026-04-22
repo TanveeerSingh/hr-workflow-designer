@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Play, X, CheckCircle, XCircle, Clock, AlertCircle, Loader2 } from 'lucide-react';
 import type { SimulationResult, SimulationStep, WorkflowGraph } from '../types/index';
 import { mockApi } from '../api/mockApi';
@@ -6,6 +6,7 @@ import { mockApi } from '../api/mockApi';
 interface SimulationPanelProps {
   workflow: WorkflowGraph;
   isOpen: boolean;
+  runTrigger: number;
   onClose: () => void;
 }
 
@@ -50,12 +51,12 @@ function StepItem({ step, index }: { step: SimulationStep; index: number }) {
   );
 }
 
-export default function SimulationPanel({ workflow, isOpen, onClose }: SimulationPanelProps) {
+export default function SimulationPanel({ workflow, isOpen, runTrigger, onClose }: SimulationPanelProps) {
   const [result, setResult] = useState<SimulationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const runSimulation = async () => {
+  const runSimulation = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     setResult(null);
@@ -68,13 +69,25 @@ export default function SimulationPanel({ workflow, isOpen, onClose }: Simulatio
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [workflow]);
+
+  useEffect(() => {
+    if (isOpen && runTrigger > 0) {
+      const timeoutId = window.setTimeout(() => {
+        void runSimulation();
+      }, 0);
+
+      return () => {
+        window.clearTimeout(timeoutId);
+      };
+    }
+  }, [isOpen, runTrigger, runSimulation]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-80 bg-gradient-to-b from-surface to-surface-dim border-l border-border shadow-elevation animate-slide-in-right z-50 flex flex-col overflow-hidden">
-      <div className="p-5 border-b border-border bg-surface flex items-center justify-between">
+    <div className="w-72 bg-gradient-to-b from-surface to-surface-dim border-l border-border shadow-elevation animate-slide-in-right flex flex-col overflow-hidden">
+      <div className="p-4 border-b border-border bg-surface flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-foreground">Simulation</h2>
           <p className="text-xs text-text-tertiary font-medium mt-1">Test your workflow logic</p>
@@ -87,7 +100,7 @@ export default function SimulationPanel({ workflow, isOpen, onClose }: Simulatio
         </button>
       </div>
 
-      <div className="p-5 border-b border-border bg-surface-dim">
+      <div className="p-4 border-b border-border bg-surface-dim">
         <button
           onClick={runSimulation}
           disabled={isLoading}
@@ -107,7 +120,7 @@ export default function SimulationPanel({ workflow, isOpen, onClose }: Simulatio
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {error && (
           <div className="flex items-start gap-3 p-4 bg-error/10 border border-error/20 rounded-lg">
             <AlertCircle className="w-5 h-5 text-error flex-shrink-0 mt-0.5" />
@@ -177,7 +190,7 @@ export default function SimulationPanel({ workflow, isOpen, onClose }: Simulatio
 
         {!result && !error && !isLoading && (
           <div className="text-center py-8">
-            <p className="text-gray-500">Click "Run Simulation" to test your workflow</p>
+            <p className="text-gray-500">Click "Test Workflow" or "Run Simulation" to execute the flow</p>
           </div>
         )}
       </div>
