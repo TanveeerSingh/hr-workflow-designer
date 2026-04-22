@@ -11,8 +11,9 @@ A modern, drag-and-drop workflow designer built with React, TypeScript, and Reac
 ### Workflow Canvas (React Flow)
 - **Drag-and-drop interface**: Drag nodes from the sidebar onto the canvas
 - **Multiple node types**: Start, Task, Approval, Automated Step, and End nodes
-- **Edge connections**: Connect nodes to define workflow paths
-- **Auto-validation**: Validates workflow structure (requires start node, end node, no cycles)
+- **Edge connections**: Connect nodes by clicking one node, then the next
+- **Auto-validation**: Validates workflow structure, including start/end requirements and cycle checks
+- **Viewport layout**: Fixed to the screen with no page scrolling
 
 ### Node Types
 
@@ -54,6 +55,11 @@ A modern, drag-and-drop workflow designer built with React, TypeScript, and Reac
 - Visual status indicators (pending, running, completed, failed)
 - Execution time tracking
 - Error reporting with clear messages
+
+### Interaction Notes
+- Load Example creates a vertical onboarding flow that stays visible on screen
+- Test Workflow opens the simulation panel and runs the workflow immediately
+- Node editing updates the selected node in real time
 
 ## Tech Stack
 
@@ -102,7 +108,7 @@ src/
 ### Live Application
 **The app is live and available at:** https://tanveeersingh.github.io/hr-workflow-designer/
 
-No local setup needed - just visit the link above to start designing workflows!
+No local setup is needed - just visit the link above to start designing workflows.
 
 ### Local Development
 
@@ -136,7 +142,7 @@ npm run build
 
 1. **Create a Workflow**:
    - Drag nodes from the left sidebar onto the canvas
-   - Connect nodes by dragging from one node's handle to another
+   - Connect nodes by clicking one node, then clicking the target node
 
 2. **Configure Nodes**:
    - Click on a node to open the configuration panel
@@ -150,8 +156,13 @@ npm run build
 
 4. **Test Workflow**:
    - Click "Test Workflow" to open the simulation panel
-   - Click "Run Simulation" to execute the workflow
+   - The simulation runs immediately when the panel opens
+   - You can click "Run Simulation" again to rerun it manually
    - View step-by-step execution results
+
+5. **Navigate the Canvas**:
+   - The app fits the workflow to the visible screen and does not scroll the page
+   - Zoom in/out controls were removed to keep the layout clean and focused
 
 ## Design System
 
@@ -173,6 +184,12 @@ With more time, the following features could be added:
 - Node version history
 - Backend persistence with real database
 - Real-time collaboration
+- Optional zoom in/out controls as a compact toolbar
+
+## Notes
+
+- The current layout is optimized for a single-screen workflow canvas with fixed panels.
+- Example workflows are arranged vertically so the full flow remains visible in the canvas.
 
 ## License
 
